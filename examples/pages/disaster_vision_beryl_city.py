@@ -12,7 +12,7 @@ st.set_page_config(
     layout="wide",
 )
 
-st.title("Disaster Analysis for Hurricane Francine")
+st.title("Disaster Analysis for Hurricane Beryl")
 
 # Function to connect to Snowflake and execute a query
 # @st.cache_resource
@@ -43,7 +43,7 @@ county_sql = (f"""
         FROM disaster_data.dv.FEMA_DECLARATION_STAGE f 
         LEFT JOIN disaster_data.dv.FIPS_COUNTY_GEOMETRY g 
         ON f.state=g.state AND f.FIPS_COUNTY_CODE =g.FIPS_COUNTY_CODE 
-        WHERE UPPER(f.DECLARATIONTITLE) LIKE '%FRANCINE%'
+        WHERE UPPER(f.DECLARATIONTITLE) LIKE '%BERYL%'
         order by f.FIPS_COUNTY_CODE desc;
         """)
 county_data =  get_snowflake_data(county_sql)
@@ -51,7 +51,24 @@ county_data =  get_snowflake_data(county_sql)
 st.write("### The fips counties declared by FEMA for the Event")
 st.dataframe(county_data)
 
-    
+ia_sql = (f"""
+        SELECT ia.state, ia.city, g.AVS_LATITUDE,g.AVS_LONGITUDE, 
+                sum(ia.APPROVEDFORFEMAASSISTANCE) AS approved_assistances 
+        FROM  disaster_data.dv.FEMA_IA ia
+        LEFT JOIN disaster_data.dv.STATE_CITY_GEOMETRY g 
+        ON ia.state=g.state AND ia.CITY =g.HOUSE_CITY 
+        WHERE ia.state='TX' AND DISASTERNUMBER =4798
+            AND g.AVS_LATITUDE IS NOT NULL AND g.AVS_LONGITUDE IS NOT NULL 
+        GROUP BY ia.state,ia.CITY , g.AVS_LATITUDE, g.AVS_LONGITUDE
+        HAVING approved_assistances >50
+        order by sum(ia.APPROVEDFORFEMAASSISTANCE) desc;
+        """)
+
+ia_data =  get_snowflake_data(ia_sql)
+
+st.write("### The zipcodes granted  by FEMA IA Program")
+st.dataframe(ia_data)
+  
 # check data for final report
 runsql = (f"""
         SELECT dv.FEMA_DISASTER_NUMBER, dv.DISASTER_INDICATOR,dv.DISASTER_TYPE,dv.CITY,
@@ -59,7 +76,7 @@ runsql = (f"""
         avg(dv.AVS_LONGITUDE) AS AVS_LONGITUDE,
         count(*) AS HOMES
         FROM DISASTER_DATA.dv.DISASTER_VIEW dv
-        WHERE dv.FEMA_DISASTER_NUMBER  IN (4817,3614)
+        WHERE dv.FEMA_DISASTER_NUMBER  IN (4798)
         GROUP BY dv.FEMA_DISASTER_NUMBER, dv.DISASTER_INDICATOR,dv.DISASTER_TYPE,dv.CITY 
         ORDER BY count(*) DESC;
     """)
@@ -87,6 +104,7 @@ fg1 = folium.FeatureGroup(name="in event")
 fg2 = folium.FeatureGroup(name="in buffer")
 #fg3 = folium.FeatureGroup(name="outside event")
 fg4 = folium.FeatureGroup(name="FEMA declared")
+fg5 = folium.FeatureGroup(name="IA approved")
                         
 for i in m_df.index:
     lat = m_df.AVS_LATITUDE[i]
@@ -107,6 +125,7 @@ for i in m_df.index:
         else:
             marker = folium.CircleMarker([lat, long],popup=pop_txt,radius=r,color='green', fill=True,fill_color='green',fill_opacity=0.5).add_to(fg3)
 
+
 for j in county_data.index:
     lat = county_data.AVS_LATITUDE[j]
     long = county_data.AVS_LONGITUDE[j]
@@ -115,11 +134,22 @@ for j in county_data.index:
                            """)
     if lat and long:
         marker = folium.CircleMarker([lat, long], popup=pop_txt, radius=3,color='gray', fill=True,fill_color='grey',fill_opacity=0.5).add_to(fg4)
+
+for k in ia_data.index:
+    lat = ia_data.AVS_LATITUDE[k]
+    long = ia_data.AVS_LONGITUDE[k]
+    pop_txt = folium.Popup(f"""
+                           City:{ia_data.CITY[k]}
+                           """)
+    if lat and long:
+        marker = folium.CircleMarker([lat, long], popup=pop_txt, radius=2,color='skyblue', fill=True,fill_color='skyblue',fill_opacity=0.5).add_to(fg5)
+        
     
 m.add_child(fg1)
 m.add_child(fg2)
 #m.add_child(fg3)
 m.add_child(fg4)
+m.add_child(fg5)
 folium.LayerControl(collapsed=False).add_to(m)
 
 #m.save(outfile= "test.html")
