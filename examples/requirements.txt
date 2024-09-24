@@ -2,3 +2,7 @@ streamlit!=1.34.0
 streamlit-folium
 requests
 geopandas
+snowflake-connector-python==3.11.0
+cryptography==36.0.2
+snowflake-sqlalchemy==1.5.1
+pyOpenSSL==21.0.0

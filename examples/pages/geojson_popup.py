@@ -86,7 +86,7 @@ tooltip = GeoJsonTooltip(
         border-radius: 3px;
         box-shadow: 3px;
     """,
-    max_width=800,
+    max_width=1024,
 )
 
 folium.GeoJson(

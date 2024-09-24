@@ -13,7 +13,7 @@ st.set_page_config(
 [Folium](https://python-visualization.github.io/folium/)!"""
 
 """
-Currently, there are two functions defined:
+Currently, there are two functions defined as below:
 
 - `st_folium()`: a bi-directional Component, taking a Folium/Branca object and plotting
   to the Streamlit app. Upon mount/interaction with the Streamlit app, st_folium()
