@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+streamlit = ">=1.13.0"
+folium = "!=0.15.0,>=0.13"
+jinja2 = "*"
+branca = "*"
+geopandas = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"

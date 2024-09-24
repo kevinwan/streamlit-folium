@@ -94,7 +94,7 @@ folium.LayerControl(collapsed=False).add_to(m)
 #m.save(outfile= "test.html")
 #m
 st.write("### the view of properties in the map")
-st_folium(m, width=1200)
+st_folium(m, width=1150)
 
 # Optional: Simple data visualization (e.g., plotting data)
 if not data.empty:

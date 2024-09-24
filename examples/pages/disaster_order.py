@@ -6,6 +6,9 @@ from streamlit_folium import st_folium
 import snowflake.connector
 import pandas as pd
 
+
+
+
 st.set_page_config(
     page_title="Properties in the disaster core and buffer",
     page_icon=":pencil:",
@@ -13,6 +16,30 @@ st.set_page_config(
 )
 
 st.title("Properties in the disaster core and buffer")
+
+#######################
+# Load data
+
+#st.write("### Upload the DV Order Spreadsheet")
+#dv_order = pd.read_csv('data/DV_CALIBER.csv')
+#st.dataframe(dv_order)
+
+#######################
+
+# Upload CSV file
+st.write("### Upload the DV Order Spreadsheet")
+
+uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+
+
+if uploaded_file is not None:
+    # Read the CSV file into a Pandas DataFrame
+    df = pd.read_csv('data/DV_CALIBER.csv')
+    
+    # Display the DataFrame
+    # st.write("### Uploaded Data:")
+    st.dataframe(df)
+
 
 # Function to connect to Snowflake and execute a query
 # @st.cache_resource
@@ -96,7 +123,7 @@ folium.LayerControl(collapsed=False).add_to(m)
 #m.save(outfile= "test.html")
 #m
 st.write("### the view of properties in the map")
-st_folium(m, width=1500)
+st_folium(m, width=1150)
 
 # Optional: Simple data visualization (e.g., plotting data)
 if not data.empty:
